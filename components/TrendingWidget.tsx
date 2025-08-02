@@ -1,11 +1,11 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { TrendingUp, Clock, Eye,  } from "lucide-react";
+import { TrendingUp, Clock, Eye } from "lucide-react";
 
 interface TrendingNews {
   id: number;
@@ -14,10 +14,12 @@ interface TrendingNews {
   views: number;
   timeAgo: string;
   isRising?: boolean;
+  imageUrl?: string;
 }
 
 const TrendingWidget = () => {
   const [activeTab, setActiveTab] = useState("trending");
+
   const [trendingNews, setTrendingNews] = useState<TrendingNews[]>([
     {
       id: 1,
@@ -25,7 +27,8 @@ const TrendingWidget = () => {
       category: "ক্রিকেট",
       views: 15420,
       timeAgo: "২ ঘন্টা আগে",
-      isRising: true
+      isRising: true,
+      imageUrl: "https://picsum.photos/seed/1/80/80",
     },
     {
       id: 2,
@@ -33,21 +36,24 @@ const TrendingWidget = () => {
       category: "আবহাওয়া",
       views: 12850,
       timeAgo: "৩ ঘন্টা আগে",
-      isRising: true
+      isRising: true,
+      imageUrl: "https://picsum.photos/seed/2/80/80",
     },
     {
       id: 3,
       title: "কেন্দ্রীয় বাজেটে নতুন ঘোষণা, মধ্যবিত্তদের জন্য সুখবর",
       category: "অর্থনীতি",
       views: 9670,
-      timeAgo: "৪ ঘন্টা আগে"
+      timeAgo: "৪ ঘন্টা আগে",
+      imageUrl: "https://picsum.photos/seed/3/80/80",
     },
     {
       id: 4,
       title: "কলকাতা মেট্রোর নতুন রুট উদ্বোধন আগামী সপ্তাহে",
       category: "কলকাতা",
       views: 8340,
-      timeAgo: "৫ ঘন্টা আগে"
+      timeAgo: "৫ ঘন্টা আগে",
+      imageUrl: "https://picsum.photos/seed/4/80/80",
     },
     {
       id: 5,
@@ -55,8 +61,9 @@ const TrendingWidget = () => {
       category: "ফুটবল",
       views: 7290,
       timeAgo: "৬ ঘন্টা আগে",
-      isRising: true
-    }
+      isRising: true,
+      imageUrl: "https://picsum.photos/seed/5/80/80",
+    },
   ]);
 
   const [recentNews, setRecentNews] = useState<TrendingNews[]>([
@@ -65,39 +72,43 @@ const TrendingWidget = () => {
       title: "রাজ্যে নতুন স্বাস্থ্য প্রকল্প চালু, বিনামূল্যে চিকিৎসা",
       category: "স্বাস্থ্য",
       views: 5420,
-      timeAgo: "১৫ মিনিট আগে"
+      timeAgo: "১৫ মিনিট আগে",
+      imageUrl: "https://picsum.photos/seed/6/80/80",
     },
     {
       id: 7,
       title: "প্রবাসী বাঙালিদের জন্য নতুন সুবিধা ঘোষণা",
       category: "প্রবাস",
       views: 4850,
-      timeAgo: "৩০ মিনিট আগে"
+      timeAgo: "৩০ মিনিট আগে",
+      imageUrl: "https://picsum.photos/seed/7/80/80",
     },
     {
       id: 8,
       title: "শিক্ষা ক্ষেত্রে ডিজিটাল বিপ্লব, নতুন অ্যাপ চালু",
       category: "শিক্ষা",
       views: 3670,
-      timeAgo: "৪৫ মিনিট আগে"
+      timeAgo: "৪৫ মিনিট আগে",
+      imageUrl: "https://picsum.photos/seed/8/80/80",
     },
     {
       id: 9,
       title: "বাংলা সিনেমার নতুন তারকা, আন্তর্জাতিক পর্যায়ে সম্মাননা",
       category: "বিনোদন",
       views: 6340,
-      timeAgo: "১ ঘন্টা আগে"
-    }
+      timeAgo: "১ ঘন্টা আগে",
+      imageUrl: "https://picsum.photos/seed/9/80/80",
+    },
   ]);
 
-  // Simulate real-time updates
   useEffect(() => {
     const interval = setInterval(() => {
-      // Update view counts randomly
-      setTrendingNews(prev => prev.map(news => ({
-        ...news,
-        views: news.views + Math.floor(Math.random() * 50)
-      })));
+      setTrendingNews((prev) =>
+        prev.map((news) => ({
+          ...news,
+          views: news.views + Math.floor(Math.random() * 50),
+        }))
+      );
     }, 10000);
 
     return () => clearInterval(interval);
@@ -106,28 +117,44 @@ const TrendingWidget = () => {
   const NewsItem = ({ news }: { news: TrendingNews }) => (
     <div className="p-3 hover:bg-gray-50 transition-colors cursor-pointer border-b border-gray-100 last:border-b-0">
       <div className="flex items-start space-x-3">
+        {/* Image */}
+        {news.imageUrl && (
+          <div className="w-20 h-20 rounded overflow-hidden flex-shrink-0">
+            <Image
+              src={news.imageUrl}
+              alt={news.title}
+              width={80}
+              height={80}
+              className="object-cover w-full h-full"
+            />
+          </div>
+        )}
+
+        {/* Content */}
         <div className="flex-1">
           <h4 className="font-bengali text-sm font-medium line-clamp-2 hover:text-news-red transition-colors">
             {news.title}
           </h4>
-          
-          <div className="flex items-center space-x-3 mt-2">
+
+          <div className="flex items-center flex-wrap space-x-3 mt-2">
             <Badge variant="secondary" className="text-xs font-bengali">
               {news.category}
             </Badge>
-            
+
             <div className="flex items-center space-x-1 text-xs text-meta-text">
               <Eye className="w-3 h-3" />
-              <span className="font-english">{news.views.toLocaleString()}</span>
+              <span className="font-english">
+                {news.views.toLocaleString()}
+              </span>
             </div>
-            
+
             <div className="flex items-center space-x-1 text-xs text-meta-text">
               <Clock className="w-3 h-3" />
               <span className="font-bengali">{news.timeAgo}</span>
             </div>
           </div>
         </div>
-        
+
         {news.isRising && (
           <div className="flex-shrink-0">
             <Badge className="bg-green-100 text-green-800 text-xs">
@@ -145,15 +172,15 @@ const TrendingWidget = () => {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <div className="bg-gray-50 border-b border-gray-200">
           <TabsList className="w-full bg-transparent border-0 rounded-none h-auto p-0">
-            <TabsTrigger 
-              value="trending" 
+            <TabsTrigger
+              value="trending"
               className="flex-1 data-[state=active]:bg-white data-[state=active]:border-b-2 data-[state=active]:border-news-red rounded-none font-bengali"
             >
               <TrendingUp className="w-4 h-4 mr-2" />
               ট্রেন্ডিং
             </TabsTrigger>
-            <TabsTrigger 
-              value="recent" 
+            <TabsTrigger
+              value="recent"
               className="flex-1 data-[state=active]:bg-white data-[state=active]:border-b-2 data-[state=active]:border-news-red rounded-none font-bengali"
             >
               <Clock className="w-4 h-4 mr-2" />
@@ -166,10 +193,10 @@ const TrendingWidget = () => {
           <div className="max-h-96 overflow-y-auto">
             {trendingNews.map((news, index) => (
               <div key={news.id} className="relative">
-                <div className="absolute left-3 top-3 w-6 h-6 bg-news-red text-white rounded-full flex items-center justify-center text-xs font-bold">
+                <div className="absolute left-3 top-3 w-6 h-6 bg-news-red text-white rounded-full flex items-center justify-center text-xs font-bold z-10">
                   {index + 1}
                 </div>
-                <div className="pl-12">
+                <div className="pl-10">
                   <NewsItem news={news} />
                 </div>
               </div>

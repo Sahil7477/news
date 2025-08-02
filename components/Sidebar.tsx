@@ -107,6 +107,7 @@ const Sidebar = () => {
                 <Image
                   src={news.image} 
                   alt={news.title}
+                  fill
                   className="w-20 h-16 object-cover rounded flex-shrink-0"
                 />
                 <div className="flex-1 min-w-0">
