@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -13,111 +13,45 @@ interface TrendingNews {
   category: string;
   views: number;
   timeAgo: string;
-  isRising?: boolean;
   imageUrl?: string;
+  isRising?: boolean;
 }
 
 const TrendingWidget = () => {
   const [activeTab, setActiveTab] = useState("trending");
-
-  const [trendingNews, setTrendingNews] = useState<TrendingNews[]>([
-    {
-      id: 1,
-      title: "ভারত বনাম ইংল্যান্ড ৫ম টেস্টে রোহিত শর্মার অনুপস্থিতি",
-      category: "ক্রিকেট",
-      views: 15420,
-      timeAgo: "২ ঘন্টা আগে",
-      isRising: true,
-      imageUrl: "https://picsum.photos/seed/1/80/80",
-    },
-    {
-      id: 2,
-      title: "পশ্চিমবঙ্গে আজ থেকে ভারী বৃষ্টির সম্ভাবনা",
-      category: "আবহাওয়া",
-      views: 12850,
-      timeAgo: "৩ ঘন্টা আগে",
-      isRising: true,
-      imageUrl: "https://picsum.photos/seed/2/80/80",
-    },
-    {
-      id: 3,
-      title: "কেন্দ্রীয় বাজেটে নতুন ঘোষণা, মধ্যবিত্তদের জন্য সুখবর",
-      category: "অর্থনীতি",
-      views: 9670,
-      timeAgo: "৪ ঘন্টা আগে",
-      imageUrl: "https://picsum.photos/seed/3/80/80",
-    },
-    {
-      id: 4,
-      title: "কলকাতা মেট্রোর নতুন রুট উদ্বোধন আগামী সপ্তাহে",
-      category: "কলকাতা",
-      views: 8340,
-      timeAgo: "৫ ঘন্টা আগে",
-      imageUrl: "https://picsum.photos/seed/4/80/80",
-    },
-    {
-      id: 5,
-      title: "ফুটবল বিশ্বকাপের জন্য ভারতীয় দলের প্রস্তুতি",
-      category: "ফুটবল",
-      views: 7290,
-      timeAgo: "৬ ঘন্টা আগে",
-      isRising: true,
-      imageUrl: "https://picsum.photos/seed/5/80/80",
-    },
-  ]);
-
-  const [recentNews, setRecentNews] = useState<TrendingNews[]>([
-    {
-      id: 6,
-      title: "রাজ্যে নতুন স্বাস্থ্য প্রকল্প চালু, বিনামূল্যে চিকিৎসা",
-      category: "স্বাস্থ্য",
-      views: 5420,
-      timeAgo: "১৫ মিনিট আগে",
-      imageUrl: "https://picsum.photos/seed/6/80/80",
-    },
-    {
-      id: 7,
-      title: "প্রবাসী বাঙালিদের জন্য নতুন সুবিধা ঘোষণা",
-      category: "প্রবাস",
-      views: 4850,
-      timeAgo: "৩০ মিনিট আগে",
-      imageUrl: "https://picsum.photos/seed/7/80/80",
-    },
-    {
-      id: 8,
-      title: "শিক্ষা ক্ষেত্রে ডিজিটাল বিপ্লব, নতুন অ্যাপ চালু",
-      category: "শিক্ষা",
-      views: 3670,
-      timeAgo: "৪৫ মিনিট আগে",
-      imageUrl: "https://picsum.photos/seed/8/80/80",
-    },
-    {
-      id: 9,
-      title: "বাংলা সিনেমার নতুন তারকা, আন্তর্জাতিক পর্যায়ে সম্মাননা",
-      category: "বিনোদন",
-      views: 6340,
-      timeAgo: "১ ঘন্টা আগে",
-      imageUrl: "https://picsum.photos/seed/9/80/80",
-    },
-  ]);
+  const [trendingNews, setTrendingNews] = useState<TrendingNews[]>([]);
+  const [recentNews, setRecentNews] = useState<TrendingNews[]>([]);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setTrendingNews((prev) =>
-        prev.map((news) => ({
-          ...news,
-          views: news.views + Math.floor(Math.random() * 50),
-        }))
-      );
-    }, 10000);
+    const fetchNews = async () => {
+      try {
+        const res = await fetch("/api/fetch-news"); // Replace with your actual route
+        const data = await res.json();
+        const articles = data.articles || [];
 
-    return () => clearInterval(interval);
+        const mappedNews = articles.map((article: any, idx: number) => ({
+          id: idx + 1,
+          title: article.title,
+          category: article.source.name || "সাধারণ",
+          views: Math.floor(Math.random() * 10000) + 1000,
+          timeAgo: "১ ঘন্টা আগে", // You can calculate real timeAgo if needed
+          imageUrl: article.urlToImage,
+          isRising: idx < 3,
+        }));
+
+        setTrendingNews(mappedNews.slice(0, 5));
+        setRecentNews(mappedNews.slice(5, 10));
+      } catch (err) {
+        console.error("Error fetching trending news:", err);
+      }
+    };
+
+    fetchNews();
   }, []);
 
   const NewsItem = ({ news }: { news: TrendingNews }) => (
     <div className="p-3 hover:bg-gray-50 transition-colors cursor-pointer border-b border-gray-100 last:border-b-0">
       <div className="flex items-start space-x-3">
-        {/* Image */}
         {news.imageUrl && (
           <div className="w-20 h-20 rounded overflow-hidden flex-shrink-0">
             <Image
@@ -129,32 +63,24 @@ const TrendingWidget = () => {
             />
           </div>
         )}
-
-        {/* Content */}
         <div className="flex-1">
           <h4 className="font-bengali text-sm font-medium line-clamp-2 hover:text-news-red transition-colors">
             {news.title}
           </h4>
-
           <div className="flex items-center flex-wrap space-x-3 mt-2">
             <Badge variant="secondary" className="text-xs font-bengali">
               {news.category}
             </Badge>
-
             <div className="flex items-center space-x-1 text-xs text-meta-text">
               <Eye className="w-3 h-3" />
-              <span className="font-english">
-                {news.views.toLocaleString()}
-              </span>
+              <span className="font-english">{news.views.toLocaleString()}</span>
             </div>
-
             <div className="flex items-center space-x-1 text-xs text-meta-text">
               <Clock className="w-3 h-3" />
               <span className="font-bengali">{news.timeAgo}</span>
             </div>
           </div>
         </div>
-
         {news.isRising && (
           <div className="flex-shrink-0">
             <Badge className="bg-green-100 text-green-800 text-xs">

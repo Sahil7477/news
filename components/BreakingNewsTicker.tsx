@@ -12,7 +12,9 @@ interface LiveUpdate {
 
 const BreakingNewsTicker = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [liveUpdates, setLiveUpdates] = useState<LiveUpdate[]>([
+  const [liveUpdates, setLiveUpdates] = useState<LiveUpdate[]>([]);
+
+  const defaultUpdates: LiveUpdate[] = [
     {
       id: 1,
       text: "ভারত বনাম ইংল্যান্ড ৫ম টেস্ট: ওভালে শুভমনের শতক, ভারত এগিয়ে",
@@ -33,37 +35,47 @@ const BreakingNewsTicker = () => {
       text: "রাজ্যে নতুন স্বাস্থ্য প্রকল্প ঘোষণা, বিনামূল্যে চিকিৎসা সেবা",
       time: "১৫ মিনিট আগে"
     }
-  ]);
+  ];
 
+  // Fetch breaking news or use default
+  useEffect(() => {
+    const fetchBreakingNews = async () => {
+      try {
+        const res = await fetch("/api/fetch-breaking-news");
+        const data = await res.json();
+        const items = data?.articles?.slice(0, 4)?.map((item: any, i: number) => ({
+          id: i + 1,
+          text: item.title,
+          time: "এইমাত্র", // or convert with timeAgo utility
+        })) || [];
+
+        if (items.length) {
+          setLiveUpdates(items);
+        } else {
+          setLiveUpdates(defaultUpdates);
+        }
+      } catch (err) {
+        console.error("❌ Failed to fetch breaking news:", err);
+        setLiveUpdates(defaultUpdates);
+      }
+    };
+
+    fetchBreakingNews();
+  }, []);
+
+  // Auto-scroll every 4s
   useEffect(() => {
     const interval = setInterval(() => {
-      setCurrentIndex((prevIndex) => 
-        prevIndex === liveUpdates.length - 1 ? 0 : prevIndex + 1
-      );
+      setCurrentIndex(prev => (prev + 1) % liveUpdates.length);
     }, 4000);
-
     return () => clearInterval(interval);
-  }, [liveUpdates.length]);
-
-  // Simulate live updates
-  useEffect(() => {
-    const updateInterval = setInterval(() => {
-      const newUpdate: LiveUpdate = {
-        id: Date.now(),
-        text: "নতুন আপডেট: সর্বশেষ খবর পেতে থাকুন আমাদের সাথে",
-        time: "এইমাত্র"
-      };
-      
-      setLiveUpdates(prev => [newUpdate, ...prev.slice(0, 3)]);
-    }, 30000); // New update every 30 seconds
-
-    return () => clearInterval(updateInterval);
-  }, []);
+  }, [liveUpdates]);
 
   return (
     <div className="bg-news-red text-white py-2 overflow-hidden">
       <div className="container mx-auto px-4">
         <div className="flex items-center">
+          {/* Left badge + label */}
           <div className="flex items-center space-x-2 mr-4 flex-shrink-0">
             <Badge className="bg-white text-news-red font-bengali font-bold animate-pulse">
               <Zap className="w-3 h-3 mr-1" />
@@ -74,16 +86,17 @@ const BreakingNewsTicker = () => {
               <span className="font-bengali">লাইভ আপডেট</span>
             </div>
           </div>
-          
+
+          {/* News text carousel */}
           <div className="flex-1 overflow-hidden">
-            <div 
+            <div
               className="flex transition-transform duration-500 ease-in-out"
-              style={{ transform: `translateX(-${currentIndex * 100}%)` }}
+              style={{ transform: `translateX(-${currentIndex * 100}%)`, width: `${liveUpdates.length * 100}%` }}
             >
               {liveUpdates.map((update) => (
-                <div key={update.id} className="w-full flex-shrink-0">
-                  <div className="flex items-center justify-between">
-                    <span className="font-bengali text-sm md:text-base font-medium">
+                <div key={update.id} className="w-full flex-shrink-0 px-2">
+                  <div className="flex items-center justify-between whitespace-nowrap">
+                    <span className="font-bengali text-sm md:text-base font-medium truncate">
                       {update.text}
                     </span>
                     <span className="text-xs ml-4 flex-shrink-0 font-bengali opacity-80">
@@ -95,8 +108,8 @@ const BreakingNewsTicker = () => {
             </div>
           </div>
 
-          {/* Dots indicator */}
-          <div className="flex space-x-1 ml-4">
+          {/* Dots Indicator */}
+          <div className="flex space-x-1 ml-4 flex-shrink-0">
             {liveUpdates.map((_, index) => (
               <button
                 key={index}
