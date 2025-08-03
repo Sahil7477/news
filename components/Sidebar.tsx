@@ -5,7 +5,6 @@ import TrendingWidget from "./TrendingWidget";
 import NewsletterSignup from "./NewsletterSignup";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, MapPin, Thermometer, Wind } from "lucide-react";
 import Image from "next/image";
 
 interface SidebarNews {
@@ -18,10 +17,28 @@ interface SidebarNews {
   isBreaking?: boolean;
 }
 
+interface FetchedArticle {
+  title: string;
+  publishedAt: string;
+  urlToImage?: string;
+  source?: {
+    name?: string;
+  };
+}
+
 const Sidebar = () => {
   const [sidebarNews, setSidebarNews] = useState<SidebarNews[]>([]);
+
   const defaultNews: SidebarNews[] = [
-    // ... your existing default items ...
+    {
+      id: "default-1",
+      title: "এই খবরটি ডিফল্ট হিসেবে দেখানো হচ্ছে",
+      image: "/placeholder.jpg",
+      timestamp: "আজকের দিন",
+      category: "সাধারণ",
+      views: 0,
+      isBreaking: true,
+    },
   ];
 
   useEffect(() => {
@@ -29,18 +46,24 @@ const Sidebar = () => {
       try {
         const res = await fetch("/api/fetch-news?limit=6", { cache: "no-store" });
         const data = await res.json();
+
         if (data.articles?.length) {
-          const items = data.articles.slice(0, 6).map((a: any, i: number) => ({
-            id: i + "-" + a.publishedAt,
+          const items: SidebarNews[] = data.articles.slice(0, 6).map((a: FetchedArticle, i: number) => ({
+            id: `${i}-${a.publishedAt}`,
             title: a.title,
             image: a.urlToImage || "/placeholder.jpg",
             timestamp: new Date(a.publishedAt).toLocaleTimeString("bn-BD", {
-              hour: "numeric", minute: "numeric", hour12: true,
-              day: "2-digit", month: "short", year: "numeric"
+              hour: "numeric",
+              minute: "numeric",
+              hour12: true,
+              day: "2-digit",
+              month: "short",
+              year: "numeric",
             }),
             category: a.source?.name || "সাধারণ",
-            views: Math.floor(Math.random() * 10000)
+            views: Math.floor(Math.random() * 10000),
           }));
+
           setSidebarNews(items);
         } else {
           setSidebarNews(defaultNews);
@@ -95,7 +118,9 @@ const Sidebar = () => {
                   </h4>
                   <div className="flex items-center justify-between text-xs text-meta-text">
                     <span className="font-bengali">{news.timestamp}</span>
-                    <span className="font-english">{news.views?.toLocaleString()} views</span>
+                    <span className="font-english">
+                      {news.views?.toLocaleString()} views
+                    </span>
                   </div>
                 </div>
               </div>
@@ -109,14 +134,9 @@ const Sidebar = () => {
         </div>
       </div>
 
-      {/* Weather & Events */}
-      {/* ... rest of your static widgets ... */}
-
+      {/* Widgets */}
       <TrendingWidget />
       <NewsletterSignup />
-
-      {/* Ad and quick links */}
-      {/* ... */}
     </aside>
   );
 };

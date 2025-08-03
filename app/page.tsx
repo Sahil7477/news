@@ -4,13 +4,9 @@ import Sidebar from "@/components/Sidebar"
 import MainContent from "@/components/MainContent.server"
 import BreakingNewsTicker from "@/components/BreakingNewsTicker"
 
-interface Props {
-  searchParams: {
-    category?: string;
-  };
-}
 
-export default function Home({ searchParams }: Props) {
+
+export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
       <Header />

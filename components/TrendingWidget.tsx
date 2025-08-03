@@ -17,6 +17,15 @@ interface TrendingNews {
   isRising?: boolean;
 }
 
+interface FetchedArticle {
+  title: string;
+  urlToImage?: string;
+  publishedAt: string;
+  source: {
+    name: string;
+  };
+}
+
 const TrendingWidget = () => {
   const [activeTab, setActiveTab] = useState("trending");
   const [trendingNews, setTrendingNews] = useState<TrendingNews[]>([]);
@@ -25,16 +34,16 @@ const TrendingWidget = () => {
   useEffect(() => {
     const fetchNews = async () => {
       try {
-        const res = await fetch("/api/fetch-news"); // Replace with your actual route
+        const res = await fetch("/api/fetch-news");
         const data = await res.json();
-        const articles = data.articles || [];
+        const articles: FetchedArticle[] = data.articles || [];
 
-        const mappedNews = articles.map((article: any, idx: number) => ({
+        const mappedNews: TrendingNews[] = articles.map((article, idx) => ({
           id: idx + 1,
           title: article.title,
-          category: article.source.name || "সাধারণ",
+          category: article.source?.name || "সাধারণ",
           views: Math.floor(Math.random() * 10000) + 1000,
-          timeAgo: "১ ঘন্টা আগে", // You can calculate real timeAgo if needed
+          timeAgo: "১ ঘন্টা আগে",
           imageUrl: article.urlToImage,
           isRising: idx < 3,
         }));
